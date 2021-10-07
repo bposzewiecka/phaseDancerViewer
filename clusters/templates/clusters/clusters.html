@@ -1,0 +1,47 @@
+{% extends 'clusters/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!--<div class="card">
+    <div class="card-header">
+        List of assemblies
+    </div>
+-->
+    <div class="container-fluid">
+
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Sample</th>
+                    <th scope="col">Cluster name</th>
+                    <th scope="col">Type</th>
+                <!--    <th scope="col">Iterations right</th>
+                    <th scope="col">Iterations left</th>-->
+                </tr>
+            </thead>
+            <tbody>
+                {% for assembly in  assemblies %}
+                <tr>
+                    <th scope="row">
+                        {% if assembly.assembly_type == "U" %}
+                            <a href="{% url 'assembly' p_id=assembly.id p_number=0 %}"><i class="fas fa-edit"></i></a>
+                        {% endif %}
+                    </th>
+                    <td>{{assembly.sample.name}}</td>
+                    <td>{{assembly.start_name}}</td>
+                    <td>{{assembly.assembly_type}}</td>
+                <!--<td>{{assembly.iterations_right}}</td>
+                    <td>{{assembly.iterations_left}}</td> -->
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+<!--</div>-->
+
+
+{% endblock %}
+
