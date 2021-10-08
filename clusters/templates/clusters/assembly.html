@@ -38,11 +38,13 @@
 
     <div class="container-fluid">
         <nav>
-            <ul class="pagination justify-content-center" >
-                {% for i in range %}
-                    <li class="page-item {% if i == number %} active {% endif %}"><a class="page-link" href="{% url 'assembly' p_id=assembly.id p_number=i %}">{{i}}</a></li>
-                {% endfor %}
-            </ul>
+            {% for range in ranges %}
+                <ul class="pagination justify-content-center" >
+                    {% for i in range %}
+                        <li class="page-item {% if i == number %} active {% endif %}"><a class="page-link" href="{% url 'assembly' p_id=assembly.id p_number=i %}">{{i}}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
         </nav>
     </div>
 
@@ -53,11 +55,14 @@
                 <a class="nav-link active" id="browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="clusters-tab" data-toggle="tab" href="#clusters" role="tab" aria-controls="clusters" aria-selected="false">Clusters</a>
+                <a class="nav-link" id="screenshot-tab" data-toggle="tab" href="#screenshot" role="tab" aria-controls="screenshot" aria-selected="false">IGV screenshot</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="browser3-tab" data-toggle="tab" href="#browser3" role="tab" aria-controls="browser3" aria-selected="false">Browser 3</a>
+                <a class="nav-link" id="clusters-tab" data-toggle="tab" href="#clusters" role="tab" aria-controls="clusters" aria-selected="false">Clusters</a>
             </li>
+            <!--<li class="nav-item">
+                <a class="nav-link" id="browser3-tab" data-toggle="tab" href="#browser3" role="tab" aria-controls="browser3" aria-selected="false">Browser 3</a>
+            </li>-->
             <li class="nav-item">
                 <a class="nav-link" id="mapping-tab" data-toggle="tab" href="#mapping" role="tab" aria-controls="mapping" aria-selected="false">Mapping</a>
             </li>
@@ -69,33 +74,95 @@
                 <div id="igv-viewer">
                 </div>
 
-                <!--<img class="img-fluid" src="{% static downloads.IGV_VIEW_FN %}">-->
             </div>
+
+            <div class="tab-pane" id="screenshot" role="tabpanel" aria-labelledby="screenshot-tab">
+
+                <div class="container-margin">
+                    <img class="img-fluid" src="{% static downloads.IGV_VIEW_FN %}">
+                </div>
+
+            </div>
+
             <div class="tab-pane" id="clusters" role="tabpanel" aria-labelledby="clusters-tab">
 
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Cluster</th>
-                            <th scope="col">Read name</th>
-                        </tr>
-                    </thead>
-                    <tbody style="font-size:12px">
-                        {% for read in reads %}
+                <div class="container-margin">
+                    <table class="table table-clusters">
+                        <thead>
                             <tr>
-                                <td style="padding:1px; text-align: center">{{read.cluster_number}}</td>
-                                <td style="padding:1px">{{read.name}}</td>
+                                <th scope="col">Cluster</th>
+                                <th scope="col">Read name</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for read in reads %}
+                                <tr>
+                                    <td class="text-center">{{read.cluster_number}}</td>
+                                    <td >{{read.name}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
 
             </div>
-            <div class="tab-pane" id="browser3" role="tabpanel" aria-labelledby="browser3-tab">TODO</div>
-            <div class="tab-pane" id="mapping" role="tabpanel" aria-labelledby="mapping-tab">TODO</div>
+            <!--<div class="tab-pane" id="browser3" role="tabpanel" aria-labelledby="browser3-tab">TODO</div>-->
+            <div class="tab-pane" id="mapping" role="tabpanel" aria-labelledby="mapping-tab">
+
+                    {% include 'clusters/paf.html' with paf_format=paf_format pafs=pafs %}
+
+            </div>
         </div>
 
     </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+<script>
+    
+var igvDiv = document.getElementById("igv-viewer");
+
+var options =  {
+
+    reference: {
+        fastaURL: "{% static downloads.FASTA_FN %}"
+    },
+
+    tracks: [
+        {
+            name: "Clusters",
+            url: "{% static downloads.BAM_CLUSTERS_FN %}",
+            indexURL: "{% static downloads.BAI_CLUSTERS_FN %}",
+            format: "bam",
+            type: "alignment",
+            colorBy: "tag",
+            colorByTag: "YC",
+            bamColorTag: "YC",
+            alignmentRowHeight: 8,
+            autoHeight: true,
+            deletionColor: "rgb(150, 150, 150)",
+            insertionColor: "rgba(170, 170, 170, 0.2)",
+            coverageColor: "rgb(220, 220, 220)",
+
+            sort: {
+                chr: "{{ downloads.CONTIG_NAME }}",
+                position: 1000,
+                option: "TAG",
+                tag: "HP"
+            }
+        }
+    ]   
+
+}
+
+igv.createBrowser(igvDiv, options).then(function (browser) {
+    console.log("Created IGV browser");
+})
+
+</script>
 
 
 {% endblock %}

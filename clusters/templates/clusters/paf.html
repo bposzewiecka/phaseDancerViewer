@@ -1,0 +1,68 @@
+<div class="container-margin-top">
+    <ul class="nav nav-tabs" id="alignments_tab" role="tablist">
+        {% for paf in pafs %}
+            <li class="nav-item">
+                <a class="nav-link {% if forloop.first %}active{% endif %}" id="alignemnt{{forloop.counter}}-tab" data-toggle="tab" href="#alignemnt{{forloop.counter}}" role="tab" aria-controls="browser" aria-selected="true">{{paf.name}}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+
+    <div class="tab-content container-margin-top">
+        {% for paf in pafs %}
+        <div class="tab-pane {% if forloop.first %}active{% endif %}" id="alignemnt{{forloop.counter}}" role="tabpanel" aria-labelledby="alignemnt{{forloop.counter}}-tab">
+
+            <table class="table table-clusters">
+                <thead>
+                    <tr>
+                        {% for paf_field in paf_format %}
+                            <th scope="col">
+                                <div data-toggle="tooltip" title="{{paf_field.2}}">{{paf_field.0}}</div>
+                            </th>                    
+                        {% endfor %}
+                        <!--<th scope="col">
+                            <div data-toggle="tooltip" title="Link to UCSC genome browser" >Show in UCSC genome browser</div>
+                        </th>-->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for paf_line in paf.alignments %}
+                        <tr>
+                            {% for paf_value in paf_line %}
+                                <td>{{paf_value}}</td>
+                            {% endfor %}
+                            <!--<td>
+                                <a href="https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr4%3A3637745-3638000">Link</a>
+                            </td>-->
+                        </tr>                  
+                    {% endfor %}
+                        
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<!--
+<table class="table table-clusters">
+    <thead>
+        <tr>
+            <th scope="col">Column</th>
+            <th scope="col">Name</th>
+            <th scope="col">Data type</th>
+            <th scope="col">Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for paf_field in paf_format %}
+        <tr>
+            <td>{{forloop.counter}}</td>
+            <td>{{paf_field.0}}</td>
+            <td>{{paf_field.1}}</td>
+            <td>{{paf_field.2}}</td>
+        </tr>                      
+        {% endfor %}
+    </tbody>
+</table>-->

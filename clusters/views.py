@@ -2,17 +2,30 @@ from django.shortcuts import render
 from .models import Assembly
 import yaml
 
-#f'data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.clusters.{type}.png'
-
-DOWNLOADS_FN = {
+DOWNLOADS = {
     'IGV_VIEW_FN': 'data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.clusters.{type}.png',
     'FASTA_FN': 'data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.fasta',
     'BAM_CLUSTERS_FN': 'data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.clusters.bam',
-    'BAI_CLUSTERS_FN': 'data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.clusters.bai'
+    'BAI_CLUSTERS_FN': 'data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.clusters.bam.bai',
+    'CONTIG_NAME': 'seq_{number}_{start_name}_{cl_type}_{cluster}_{sample}'
 }
 
 CLUSTERS_FN = 'static/data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.clusters.tsv'
 SELECTED_CLUSTER_FN = 'static/data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.selected_cluster.yaml'
+PAF_FN = 'static/data/{sample}/{start_name}/{cl_type}_{cluster}/seq_{number}/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.paf'
+
+PAF_FORMAT = [('qname', 'string', 'Query sequence name'),
+    ('qlen', 'int', 'Query sequence length'),
+    ('qstart', 'int', 'Query start (0-based; BED-like; closed)'),
+    ('qend', 'int', ' Query end (0-based; BED-like; open)'),
+    ('strand', 'char', 'Relative strand: "+" or "-"'),
+    ('tname', 'string', 'Target sequence name'),
+    ('tlen', 'int', 'Target sequence length'),
+    ('tstart', 'int', 'Target start on original strand (0-based)'),
+    ('tend', 'int', 'Target end on original strand (0-based)'),
+    ('nmatch', 'int', 'Number of residue matches'),
+    ('alen', 'int', 'Alignment block length'),
+    ('mapq', 'int', 'Mapping quality (0-255; 255 for missing)')]
 
 def index(request):
     return render(request, 'clusters/index.html')
@@ -25,6 +38,9 @@ def clusters(request):
 
 def get_reads(clusters_fn):
     return [ { 'cluster_number': line.split()[0], 'name': line.split()[1]} for line in open( clusters_fn)]
+
+def get_paf(paf_fn):
+    return [ line.split('\t')[:12] for line in open(paf_fn)]
 
 def get_selected_cluster(selected_cluster_fn):
 
@@ -52,15 +68,23 @@ def assembly(request, p_id, p_number):
     selected_cluster = get_selected_cluster(selected_cluster_fn)
 
     downloads = {}
-    downloads['IGV_VIEW_FN'] = DOWNLOADS_FN['IGV_VIEW_FN'].format(**fn_kwargs)
-    downloads['FASTA_FN'] = DOWNLOADS_FN['FASTA_FN'].format(**fn_kwargs)
-    downloads['BAM_CLUSTERS_FN'] = DOWNLOADS_FN['BAM_CLUSTERS_FN'].format(**fn_kwargs)
-    downloads['BAI_CLUSTERS_FN']= DOWNLOADS_FN['BAI_CLUSTERS_FN'].format(**fn_kwargs)
+    downloads['IGV_VIEW_FN'] = DOWNLOADS['IGV_VIEW_FN'].format(**fn_kwargs)
+    downloads['FASTA_FN'] = DOWNLOADS['FASTA_FN'].format(**fn_kwargs)
+    downloads['BAM_CLUSTERS_FN'] = DOWNLOADS['BAM_CLUSTERS_FN'].format(**fn_kwargs)
+    downloads['BAI_CLUSTERS_FN']= DOWNLOADS['BAI_CLUSTERS_FN'].format(**fn_kwargs)
+    downloads['CONTIG_NAME']= DOWNLOADS['CONTIG_NAME'].format(**fn_kwargs)
     
+    paf_fn = PAF_FN.format(**fn_kwargs)
+
+
     return render(request, 'clusters/assembly.html', {  'assembly': assembly, 
-                                                        'range': range(assembly.iterations_right + 1) , 
+                                                        'ranges': [range(assembly.iterations_right + 1)] , 
                                                         'number': p_number, 
                                                         'reads': reads,
                                                         'downloads': downloads,
-                                                        'selected_cluster': selected_cluster
-                                                        })
+                                                        'selected_cluster': selected_cluster,
+                                                        'paf_format': PAF_FORMAT ,
+                                                        'pafs': ( {'name':  'hg38', 'alignments': get_paf(paf_fn)[:10]},
+                                                                  {'name':  'panTro6','alignments': get_paf(paf_fn)[:10]})
+                                                    })
+
