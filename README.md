@@ -31,6 +31,6 @@ Click on the button "Load the configuration file" to load the metadata of sample
 This step may be repeated if the configuration file will change.
 
 
-## Screenshot of IGV viewer
+## Screenshot of PhaseDancerViewer
 
 ![Image PhaseDancerViewer application](/phaseDancerViewer.png?raw=true "PhaseDancerViewer application")
