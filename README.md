@@ -14,16 +14,16 @@ cd  phaseDancerViewer
 pip install -r requirements.txt
 ```
 
-### Step 2: Creating symbolic link to phaseDancer assembler results
+### Step 2: Creating symbolic link to PhaseDancer assembler results
 
-Assume you have **phaseDancer** installed in *path_to_dir/phaseDancer* directory, following command:
+Assume you have **PhaseDancer** installed in *path_to_dir/phaseDancer* directory, following command:
 
 ```
 cd static
 ln -s phaseDancer path_to_dir/phaseDancer
 ```
 
-will create symbolic link that connect **phaseDancer** assembler results with the **PhaseDancerViewer** application.
+will create symbolic link that connects **PhaseDancer** assembler results with the **PhaseDancerViewer** application.
 
 ### Step 3: Loading the configuration file
 
