@@ -19,8 +19,7 @@ pip install -r requirements.txt
 Assume you have **PhaseDancer** installed in *path_to_dir/phaseDancer* directory, following command:
 
 ```
-cd static
-ln -s phaseDancer path_to_dir/phaseDancer
+ln -s static/phaseDancer path_to_dir/phaseDancer
 ```
 
 will create symbolic link that connects **PhaseDancer** assembler results with the **PhaseDancerViewer** application.
