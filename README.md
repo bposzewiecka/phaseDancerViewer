@@ -29,3 +29,8 @@ will create symbolic link that connects **PhaseDancer** assembler results with t
 
 Click on the button "Load the configuration file" to load the metadata of samples and created contigs.
 This step may be repeated if the configuration file will change.
+
+
+## Screenshot of IGV viewer
+
+![Image PhaseDancerViewer application](/phaseDancerViewer.png?raw=true "PhaseDancerViewer application")
