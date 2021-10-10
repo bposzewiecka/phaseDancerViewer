@@ -27,5 +27,5 @@ will create symbolic link that connects **PhaseDancer** assembler results with t
 
 ### Step 3: Loading the configuration file
 
-Click on the button "Load the configuration file" to load metadata of sample and created contigs.
+Click on the button "Load the configuration file" to load the metadata of samples and created contigs.
 This step may be repeated if the configuration file will change.
