@@ -2,7 +2,7 @@
 
 ##  Installation
 
-### Step 1: Installing django application
+### Step 1: Installing django PhaseDancerViewer application
 
 To install PhaseDancerViewer djnago application you have to execute the following commands:
 
@@ -14,7 +14,7 @@ cd  phaseDancerViewer
 pip install -r requirements.txt
 ```
 
-### Step 2: Creating symbolic link to phaseDancer directory
+### Step 2: Creating symbolic link to phaseDancer assembler results
 
 Assummed you have **phaseDancer** installed in *path_to_dir/phaseDancer* directory, following command:
 
@@ -25,7 +25,7 @@ ln -s phaseDancer path_to_dir/phaseDancer
 
 will create symbolic link that connect **phaseDancer** assembler results with the **PhaseDancerViewer** application.
 
-### Step 3: 
+### Step 3: Loading the configuration file
 
-Click on the button "Load configuration file" to load metadata of sample and created contigs.
+Click on the button "Load the configuration file" to load metadata of sample and created contigs.
 This step may be repeated if configuration file will change.
