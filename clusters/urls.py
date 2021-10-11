@@ -6,9 +6,8 @@ from . import views
 urlpatterns = [
     path('', views.index, name='index'),
     path('clusters', views.clusters, name='clusters'),
-    path('assembly/<int:p_id>/<int:p_number>', views.assembly, name='assembly'),
+    path('contig/<int:p_id>/<int:p_number>', views.contig, name='contig'),
     path('igv', views.igv, name='igv'),
-
 ]
 
 

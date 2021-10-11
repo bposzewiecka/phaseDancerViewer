@@ -13,16 +13,16 @@
                     <th scope="col">Type</th>
                     <th scope="col">Selected cluster</th>
                     <th scope="col">Reference</th>
-                    <th scope="col">Alignment</th>
+                    <th scope="" ope="col">alignmentt</th>
                     <th scope="col">Reference 3</th>
                     <th scope="col">Alignment 3</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>    
-                    <td>{{assembly.sample.name}}</td>
-                    <td>{{assembly.start_name}}</td>
-                    <td>{{assembly.assembly_type}}</td>
+                    <td>{{contig.sample.name}}</td>
+                    <td>{{contig.start_name}}</td>
+                    <td>{{contig.assembly_type}}</td>
                     <td>{{selected_cluster}}</td>
                     <td><a href="{% static downloads.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a></td>
                     <td><a href="{% static downloads.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
@@ -41,7 +41,7 @@
             {% for range in ranges %}
                 <ul class="pagination justify-content-center" >
                     {% for i in range %}
-                        <li class="page-item {% if i == number %} active {% endif %}"><a class="page-link" href="{% url 'assembly' p_id=assembly.id p_number=i %}">{{i}}</a></li>
+                        <li class="page-item {% if i == number %} active {% endif %}"><a class="page-link" href="{% url 'contig' p_id=contig.id p_number=i %}">{{i}}</a></li>
                     {% endfor %}
                 </ul>
             {% endfor %}
@@ -51,38 +51,55 @@
     <div class="container-fluid">
 
         <ul class="nav nav-tabs" id="main_content_tab" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="screenshot-tab" data-toggle="tab" href="#screenshot" role="tab" aria-controls="screenshot" aria-selected="false">IGV screenshot</a>
-            </li>
+
+            {% if contig.get_browser %}
+                <li class="nav-item">
+                    <a class="nav-link active" id="browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>
+                </li>
+            {% endif %}
+
+            {% if contig.get_igv_screenshot %}
+                <li class="nav-item">
+                    <a class="nav-link" id="screenshot-tab" data-toggle="tab" href="#screenshot" role="tab" aria-controls="screenshot" aria-selected="false">IGV screenshot</a>
+                </li>
+            {% endif %}
+
             <li class="nav-item">
                 <a class="nav-link" id="clusters-tab" data-toggle="tab" href="#clusters" role="tab" aria-controls="clusters" aria-selected="false">Clusters</a>
             </li>
+
             <!--<li class="nav-item">
                 <a class="nav-link" id="browser3-tab" data-toggle="tab" href="#browser3" role="tab" aria-controls="browser3" aria-selected="false">Browser 3</a>
             </li>-->
-            <li class="nav-item">
-                <a class="nav-link" id="mapping-tab" data-toggle="tab" href="#mapping" role="tab" aria-controls="mapping" aria-selected="false">Mapping</a>
-            </li>
+            
+            {% if contig.mappings.count %}
+                <li class="nav-item">
+                    <a class="nav-link" id="mapping-tab" data-toggle="tab" href="#mapping" role="tab" aria-controls="mapping" aria-selected="false">Mappings</a>
+                </li>
+            {% endif %}
+           
         </ul>
 
         <div class="tab-content">
-            <div class="tab-pane active" id="browser" role="tabpanel" aria-labelledby="browser-tab">
 
-                <div id="igv-viewer">
+            {% if contig.get_browser %}
+                <div class="tab-pane active" id="browser" role="tabpanel" aria-labelledby="browser-tab">
+                    
+                    <div id="igv-viewer">
+                    </div>
+                   
                 </div>
+            {% endif %}
 
-            </div>
+            {% if contig.get_igv_screenshot %}
+                <div class="tab-pane" id="screenshot" role="tabpanel" aria-labelledby="screenshot-tab">
 
-            <div class="tab-pane" id="screenshot" role="tabpanel" aria-labelledby="screenshot-tab">
+                    <div class="container-margin">
+                        <img class="img-fluid" src="{% static downloads.IGV_VIEW_FN %}">
+                    </div>
 
-                <div class="container-margin">
-                    <img class="img-fluid" src="{% static downloads.IGV_VIEW_FN %}">
                 </div>
-
-            </div>
+            {% endif %}
 
             <div class="tab-pane" id="clusters" role="tabpanel" aria-labelledby="clusters-tab">
 
@@ -107,12 +124,15 @@
 
 
             </div>
+
             <!--<div class="tab-pane" id="browser3" role="tabpanel" aria-labelledby="browser3-tab">TODO</div>-->
-            <div class="tab-pane" id="mapping" role="tabpanel" aria-labelledby="mapping-tab">
 
-                    {% include 'clusters/paf.html' with paf_format=paf_format pafs=pafs %}
+            {% if contig.mappings %}
+                <div class="tab-pane" id="mapping" role="tabpanel" aria-labelledby="mapping-tab">
+                        {% include 'clusters/paf.html' with paf_format=paf_format pafs=pafs %}
+                </div>
+            {% endif %}
 
-            </div>
         </div>
 
     </div>
@@ -121,48 +141,49 @@
 
 {% block javascript %}
 
-<script>
-    
-var igvDiv = document.getElementById("igv-viewer");
+    {% if assembly.get_browser %}
+    <script>
+        
+    var igvDiv = document.getElementById("igv-viewer");
 
-var options =  {
+    var options =  {
 
-    reference: {
-        fastaURL: "{% static downloads.FASTA_FN %}"
-    },
+        reference: {
+            fastaURL: "{% static downloads.FASTA_FN %}"
+        },
 
-    tracks: [
-        {
-            name: "Clusters",
-            url: "{% static downloads.BAM_CLUSTERS_FN %}",
-            indexURL: "{% static downloads.BAI_CLUSTERS_FN %}",
-            format: "bam",
-            type: "alignment",
-            colorBy: "tag",
-            colorByTag: "YC",
-            bamColorTag: "YC",
-            alignmentRowHeight: 8,
-            autoHeight: true,
-            deletionColor: "rgb(150, 150, 150)",
-            insertionColor: "rgba(170, 170, 170, 0.2)",
-            coverageColor: "rgb(220, 220, 220)",
+        tracks: [
+            {
+                name: "Clusters",
+                url: "{% static downloads.BAM_CLUSTERS_FN %}",
+                indexURL: "{% static downloads.BAI_CLUSTERS_FN %}",
+                format: "bam",
+                type: "alignment",
+                colorBy: "tag",
+                colorByTag: "YC",
+                bamColorTag: "YC",
+                alignmentRowHeight: 8,
+                autoHeight: true,
+                deletionColor: "rgb(150, 150, 150)",
+                insertionColor: "rgba(170, 170, 170, 0.2)",
+                coverageColor: "rgb(220, 220, 220)",
 
-            sort: {
-                chr: "{{ downloads.CONTIG_NAME }}",
-                position: 1000,
-                option: "TAG",
-                tag: "HP"
+                sort: {
+                    chr: "{{ downloads.CONTIG_NAME }}",
+                    position: 1000,
+                    option: "TAG",
+                    tag: "HP"
+                }
             }
-        }
-    ]   
+        ]   
 
-}
+    }
 
-igv.createBrowser(igvDiv, options).then(function (browser) {
-    console.log("Created IGV browser");
-})
+    igv.createBrowser(igvDiv, options).then(function (browser) {
+        console.log("Created IGV browser");
+    })
 
-</script>
-
+    </script>
+    {% endif %}
 
 {% endblock %}

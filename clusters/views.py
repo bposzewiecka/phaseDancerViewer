@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Assembly
+from .models import Contig
 import yaml
 
 DOWNLOADS = {
@@ -34,7 +34,7 @@ def igv(request):
     return render(request, 'clusters/igv.html')
 
 def clusters(request):
-    return render(request, 'clusters/clusters.html', { 'assemblies': Assembly.objects.all()})
+    return render(request, 'clusters/clusters.html', { 'contigs': Contig.objects.all()})
 
 def get_reads(clusters_fn):
     return [ { 'cluster_number': line.split()[0], 'name': line.split()[1]} for line in open( clusters_fn)]
@@ -49,12 +49,12 @@ def get_selected_cluster(selected_cluster_fn):
         selected_cluster = cluster_data['selected']
         return  f'{selected_cluster:03d}' 
 
-def assembly(request, p_id, p_number):
-    assembly = Assembly.objects.get(pk = p_id)
+def contig(request, p_id, p_number):
+    contig = Contig.objects.get(pk = p_id)
 
     fn_kwargs = {
-        'sample': assembly.sample.name, 
-        'start_name': assembly.start_name, 
+        'sample': contig.sample.name, 
+        'start_name': contig.name, 
         'cl_type': 'nc', 
         'cluster': '000', 
         'type': 'collapsed', 
@@ -76,9 +76,8 @@ def assembly(request, p_id, p_number):
     
     paf_fn = PAF_FN.format(**fn_kwargs)
 
-
-    return render(request, 'clusters/assembly.html', {  'assembly': assembly, 
-                                                        'ranges': [range(assembly.iterations_right + 1)] , 
+    return render(request, 'clusters/contig.html', {  'contig':  contig, 
+                                                        'ranges': [range(contig.get_iterations_right + 1)] , 
                                                         'number': p_number, 
                                                         'reads': reads,
                                                         'downloads': downloads,

@@ -1,11 +1,16 @@
 from django.contrib import admin
-from clusters.models import Sample, Assembly
+from clusters.models import Sample, Contig, Reference
 
 class SampleAdmin(admin.ModelAdmin):
     pass
 
-class AssemblyAdmin(admin.ModelAdmin):
+class ContigAdmin(admin.ModelAdmin):
     pass
 
+class ReferenceAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(Sample, SampleAdmin)
-admin.site.register(Assembly, AssemblyAdmin)
+admin.site.register(Contig, ContigAdmin)
+admin.site.register(Reference, ReferenceAdmin)
