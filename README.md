@@ -12,6 +12,9 @@ source phaseDancerViewer_venv/bin/activate
 git clone https://github.com/bposzewiecka/phaseDancerViewer.git
 cd  phaseDancerViewer
 pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
+python manage.py shell < create_db_objects.py
 ```
 
 ### Step 2: Creating symbolic link to PhaseDancer assembler results
