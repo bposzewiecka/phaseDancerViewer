@@ -1,11 +1,15 @@
 from django.contrib import admin
-from clusters.models import Sample, Contig, Reference
+
+from clusters.models import Contig, Reference, Sample
+
 
 class SampleAdmin(admin.ModelAdmin):
     pass
 
+
 class ContigAdmin(admin.ModelAdmin):
     pass
+
 
 class ReferenceAdmin(admin.ModelAdmin):
     pass

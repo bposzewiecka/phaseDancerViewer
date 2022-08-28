@@ -10,26 +10,24 @@
                 <tr>
                     <th scope="col">Sample</th>
                     <th scope="col">Cluster name</th>
-                    <th scope="col">Type</th>
                     <th scope="col">Selected cluster</th>
                     <th scope="col">Reference</th>
-                    <th scope="" ope="col">alignmentt</th>
-                    <th scope="col">Reference 3</th>
-                    <th scope="col">Alignment 3</th>
+                    <th scope="col">Alignment on reference</th>
+                    <th scope="col">Homopolymer-compressed reference</th>
+                    <th scope="col">Alignment on homopolymer-compressed reference</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>    
+                <tr>
                     <td>{{contig.sample.name}}</td>
-                    <td>{{contig.start_name}}</td>
-                    <td>{{contig.assembly_type}}</td>
+                    <td>{{contig.name}}</td>
                     <td>{{selected_cluster}}</td>
-                    <td><a href="{% static downloads.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a></td>
-                    <td><a href="{% static downloads.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
-                        <a href="{% static downloads.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bai file</a></td>
-                    <td><a href="{% static downloads.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a></td>
-                    <td><a href="{% static downloads.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
-                        <a href="{% static downloads.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bai file</a></td>
+                    <td><a href="{% static files.uncompressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a></td>
+                    <td><a href="{% static files.uncompressed.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
+                        <a href="{% static files.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bai file</a></td>
+                    <td><a href="{% static files.uncompressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a></td>
+                    <td><a href="{% static files.compressed.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
+                        <a href="{% static files.compressed.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bai file</a></td>
                 </tr>
             </tbody>
         </table>
@@ -53,9 +51,15 @@
         <ul class="nav nav-tabs" id="main_content_tab" role="tablist">
 
             {% if contig.get_browser %}
-                <li class="nav-item">
-                    <a class="nav-link active" id="browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>
-                </li>
+
+                {% for type in files %}
+
+                    <li class="nav-item">
+                        <a class='nav-link {% if type == "uncompressed" %}active{% endif %}' id="browser-{{type}}-tab" data-toggle="tab" href="#browser-{{type}}" role="tab" aria-controls="browser-{{type}}" aria-selected="true">Browser {% if type == "compressed" %}homopolymer compressed{% endif %}</a>
+                    </li>
+
+                {% endfor %}
+
             {% endif %}
 
             {% if contig.get_igv_screenshot %}
@@ -68,34 +72,36 @@
                 <a class="nav-link" id="clusters-tab" data-toggle="tab" href="#clusters" role="tab" aria-controls="clusters" aria-selected="false">Clusters</a>
             </li>
 
-            <!--<li class="nav-item">
-                <a class="nav-link" id="browser3-tab" data-toggle="tab" href="#browser3" role="tab" aria-controls="browser3" aria-selected="false">Browser 3</a>
-            </li>-->
-            
-            {% if contig.mappings.count %}
+            {% if contig.mappings.all %}
                 <li class="nav-item">
                     <a class="nav-link" id="mapping-tab" data-toggle="tab" href="#mapping" role="tab" aria-controls="mapping" aria-selected="false">Mappings</a>
                 </li>
             {% endif %}
-           
+
         </ul>
 
         <div class="tab-content">
 
             {% if contig.get_browser %}
-                <div class="tab-pane active" id="browser" role="tabpanel" aria-labelledby="browser-tab">
-                    
-                    <div id="igv-viewer">
+
+                {% for type in files %}
+
+                    <div class="tab-pane active" id="browser-{{type}}" role="tabpanel" aria-labelledby="browser-{{type}}-tab">
+
+                        <div id="igv-viewer-{{type}}">
+                        </div>
+
                     </div>
-                   
-                </div>
+
+                {% endfor %}
+
             {% endif %}
 
             {% if contig.get_igv_screenshot %}
                 <div class="tab-pane" id="screenshot" role="tabpanel" aria-labelledby="screenshot-tab">
 
                     <div class="container-margin">
-                        <img class="img-fluid" src="{% static downloads.IGV_VIEW_FN %}">
+                        <img class="img-fluid" src="{% static files.IGV_VIEW_FN %}">
                     </div>
 
                 </div>
@@ -122,16 +128,7 @@
                     </table>
                 </div>
 
-
             </div>
-
-            <!--<div class="tab-pane" id="browser3" role="tabpanel" aria-labelledby="browser3-tab">TODO</div>-->
-
-            {% if contig.mappings %}
-                <div class="tab-pane" id="mapping" role="tabpanel" aria-labelledby="mapping-tab">
-                        {% include 'clusters/paf.html' with paf_format=paf_format pafs=pafs %}
-                </div>
-            {% endif %}
 
         </div>
 
@@ -141,49 +138,61 @@
 
 {% block javascript %}
 
-    {% if assembly.get_browser %}
+    {% if contig.get_browser %}
+
     <script>
-        
-    var igvDiv = document.getElementById("igv-viewer");
 
-    var options =  {
 
-        reference: {
-            fastaURL: "{% static downloads.FASTA_FN %}"
-        },
 
-        tracks: [
-            {
-                name: "Clusters",
-                url: "{% static downloads.BAM_CLUSTERS_FN %}",
-                indexURL: "{% static downloads.BAI_CLUSTERS_FN %}",
-                format: "bam",
-                type: "alignment",
-                colorBy: "tag",
-                colorByTag: "YC",
-                bamColorTag: "YC",
-                alignmentRowHeight: 8,
-                autoHeight: true,
-                deletionColor: "rgb(150, 150, 150)",
-                insertionColor: "rgba(170, 170, 170, 0.2)",
-                coverageColor: "rgb(220, 220, 220)",
 
-                sort: {
-                    chr: "{{ downloads.CONTIG_NAME }}",
-                    position: 1000,
-                    option: "TAG",
-                    tag: "HP"
+    function load_igv_browser(type) {
+
+        var igvDiv = document.getElementById("browser-" + type);
+
+        var files = ;
+
+        var options =  {
+
+            reference: {
+                fastaURL: "{% static files.FASTA_FN %}"
+            },
+
+            tracks: [
+                {
+                    name: "Clusters",
+                    url: "{% static files.BAM_CLUSTERS_FN %}",
+                    indexURL: "{% static files.BAI_CLUSTERS_FN %}",
+                    format: "bam",
+                    type: "alignment",
+                    colorBy: "tag",
+                    colorByTag: "YC",
+                    bamColorTag: "YC",
+                    alignmentRowHeight: 8,
+                    autoHeight: true,
+                    deletionColor: "rgb(150, 150, 150)",
+                    insertionColor: "rgba(170, 170, 170, 0.2)",
+                    coverageColor: "rgb(220, 220, 220)",
+
+                    sort: {
+                        chr: "{{ files.CONTIG_NAME }}",
+                        position: 1000,
+                        option: "TAG",
+                        tag: "HP"
+                    }
                 }
-            }
-        ]   
+            ]
+
+        }
+
+        igv.createBrowser(igvDiv, options).then(function (browser) {
+            console.log("Created IGV browser");
+        })
 
     }
 
-    igv.createBrowser(igvDiv, options).then(function (browser) {
-        console.log("Created IGV browser");
-    })
 
     </script>
+
     {% endif %}
 
 {% endblock %}

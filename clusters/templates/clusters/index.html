@@ -13,5 +13,37 @@
 
 </div>
 
-{% endblock %}
+<div class="container-fluid">
 
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">Sample</th>
+                <th scope="col">Cluster name</th>
+                <th scope="col">Type</th>
+                <th scope="col">Iterations right</th>
+                <th scope="col">Iterations left</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contig in  contigs %}
+            <tr>
+                <th scope="row">
+                    {% if contig.assembly_type == "U" %}
+                        <a href="{% url 'contig' p_id=contig.id p_number=0 %}"><i class="fas fa-edit"></i></a>
+                    {% endif %}
+                </th>
+                <td>{{contig.sample.name}}</td>
+                <td>{{contig.name}}</td>
+                <td>{{contig.assembly_type}}</td>
+                <td>{{contig.iterations_right}}</td>
+                <td>{{contig.iterations_left}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

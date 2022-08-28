@@ -18,7 +18,7 @@
                         {% for paf_field in paf_format %}
                             <th scope="col">
                                 <div data-toggle="tooltip" title="{{paf_field.2}}">{{paf_field.0}}</div>
-                            </th>                    
+                            </th>
                         {% endfor %}
                         <!--<th scope="col">
                             <div data-toggle="tooltip" title="Link to UCSC genome browser" >Show in UCSC genome browser</div>
@@ -31,12 +31,9 @@
                             {% for paf_value in paf_line %}
                                 <td>{{paf_value}}</td>
                             {% endfor %}
-                            <!--<td>
-                                <a href="https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&position=chr4%3A3637745-3638000">Link</a>
-                            </td>-->
-                        </tr>                  
+                        </tr>
                     {% endfor %}
-                        
+
                 </tbody>
             </table>
         </div>
@@ -62,7 +59,7 @@
             <td>{{paf_field.0}}</td>
             <td>{{paf_field.1}}</td>
             <td>{{paf_field.2}}</td>
-        </tr>                      
+        </tr>
         {% endfor %}
     </tbody>
 </table>-->
