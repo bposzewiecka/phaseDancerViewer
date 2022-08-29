@@ -22,11 +22,12 @@
                     <td>{{contig.sample.name}}</td>
                     <td>{{contig.name}}</td>
                     <td>{{selected_cluster}}</td>
-                    <td><a href="{% static files.uncompressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a>
+                    <td><a href="{% static files.uncompressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a><br>
                         <a href="{% static files.uncompressed.FAI_FN %}"><i class="fas fa-download"></i> Download .fasta.fai file</a></td>
                     <td><a href="{% static files.uncompressed.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
-                        <a href="{% static files.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download bam.bai file</a></td>
-                    <td><a href="{% static files.uncompressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a></td>
+                        <a href="{% static files.uncompressed.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download bam.bai file</a></td>
+                    <td><a href="{% static files.compressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a><br>
+                        <a href="{% static files.compressed.FAI_FN %}"><i class="fas fa-download"></i> Download .fasta.fai file</a></td>
                     <td><a href="{% static files.compressed.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
                         <a href="{% static files.compressed.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download bam.bai file</a></td>
                 </tr>
