@@ -36,12 +36,11 @@
 
     </div>
 
-    <div class="container-fluid" style="margin-bottom: 20px">
+    <div class="container-fluid" style="margin-bottom: 10px">
         <div class="btn-group" role="group">
-
-            <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="#">Homopolymer compressed</a>
-            <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="#">Uncompressed</a>
-            <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="#}">Both</a>
+            {% for view_mode in view_modes %}
+                <a class="btn btn {% if type == view_mode.type %}btn-primary{% else %}btn-outline-primary{% endif %}" href="{% url 'contig' p_id=contig.id p_number=0 p_type=view_mode.type %}">{{ view_mode.name }}</a>
+            {% endfor %}
         </div>
     </div>
 
@@ -58,7 +57,7 @@
                     </button>
                     <div class="dropdown-menu">
                         {% for i in range %}
-                            <a class="dropdown-item page-item"  href="{% url 'contig' p_id=contig.id p_number=i %}">{{i}}</a>
+                            <a class="dropdown-item page-item"  href="{% url 'contig' p_id=contig.id p_number=i p_type=type%}">{{i}}</a>
                         {% endfor %}
                     </div>
                 </div>
@@ -68,12 +67,12 @@
     {% endif %}
 
 
-    <div class="container-fluid" style="margin: 20px 0">
+    <div class="container-fluid" style="margin: 10px 0">
 
         <div class="btn-group" role="group">
 
             {% for i in current_ranges %}
-                <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="{% url 'contig' p_id=contig.id p_number=i %}">{{i}}</a>
+                <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="{% url 'contig' p_id=contig.id p_number=i p_type=type%}">{{i}}</a>
             {% endfor %}
 
         </div>
@@ -115,13 +114,19 @@
 
                 <div class='tab-pane active' id="browser" role="tabpanel" aria-labelledby="browser-tab">
 
-                {% for type in files %}
-
-                        <h2>{% if type == "compressed" %}Homopolymer-compressed{% else %}Uncompressed{% endif %}</h2>
-                        <div id="igv-viewer-{{type}}">
+                    {% if type == 'B' or type == 'C' %}
+                    <div>
+                        <div id="igv-viewer-compressed" >
                         </div>
+                    </div>
+                    {% endif %}
 
-                {% endfor %}
+                    {% if type == 'B' or type == 'U' %}
+                    <div>
+                        <div id="igv-viewer-uncompressed">
+                        </div>
+                    </div>
+                    {% endif %}
 
                 </div>
 
@@ -176,42 +181,46 @@
 
         var igvDiv = document.getElementById("igv-viewer-" + type);
 
-        var options =  {
+        if (igvDiv !== null) {
 
-            reference: {
-                fastaURL: fasta_fn
-            },
+            var options =  {
 
-            tracks: [
-                {
-                    name: "Clusters",
-                    url: bam_fn,
-                    indexURL: bai_fn,
-                    format: "bam",
-                    type: "alignment",
-                    colorBy: "tag",
-                    colorByTag: "YC",
-                    bamColorTag: "YC",
-                    alignmentRowHeight: 8,
-                    autoHeight: true,
-                    deletionColor: "rgb(150, 150, 150)",
-                    insertionColor: "rgba(170, 170, 170, 0.2)",
-                    coverageColor: "rgb(220, 220, 220)",
+                reference: {
+                    fastaURL: fasta_fn
+                },
 
-                    sort: {
-                        chr: "{{ contig_name }}",
-                        position: 5000,
-                        option: "TAG",
-                        tag: "HP"
+                tracks: [
+                    {
+                        name: "Clusters",
+                        url: bam_fn,
+                        indexURL: bai_fn,
+                        format: "bam",
+                        type: "alignment",
+                        colorBy: "tag",
+                        colorByTag: "YC",
+                        bamColorTag: "YC",
+                        alignmentRowHeight: 8,
+                        autoHeight: true,
+                        deletionColor: "rgb(150, 150, 150)",
+                        insertionColor: "rgba(170, 170, 170, 0.2)",
+                        coverageColor: "rgb(220, 220, 220)",
+
+                        sort: {
+                            chr: "{{ contig_name }}",
+                            position: 5000,
+                            option: "TAG",
+                            tag: "HP"
+                        }
                     }
-                }
-            ]
+                ]
+
+            };
+
+            igv.createBrowser(igvDiv, options).then(function (browser) {
+                console.log("Created IGV browser");
+            });
 
         }
-
-        igv.createBrowser(igvDiv, options).then(function (browser) {
-            console.log("Created IGV browser");
-        })
 
     }
 

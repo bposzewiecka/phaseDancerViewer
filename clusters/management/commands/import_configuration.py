@@ -64,7 +64,7 @@ class Command(BaseCommand):
 
             if not os.path.isdir(sample_path):
                 raise CommandError(
-                    f'Data from sample "{sample_name}" does not exist. Check if directory "{sample_path}" exists.'
+                    f'Data from sample "{sample_name}" are not detected. Check if directory "{sample_path}" exists.'
                 )
 
             config_fn = os.path.join(sample_path, "config.yaml")

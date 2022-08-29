@@ -28,6 +28,12 @@ CLUSTERS_FN = "static/data/{sample}/{contig}/{assembler}/{cl_type}_{cluster}/seq
 SELECTED_CLUSTER_FN = "static/data/{sample}/{contig}/{assembler}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{contig}.{cl_type}_{cluster}.{sample}.{assembler}.selected_cluster.yaml"
 # PAF_FN = 'static/data/{sample}/{start_name}/{cl_type}_{cluster}/minimap2/seq_{number}/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.paf'
 
+COMPRESSION_TYPES_VIEW_MODES = [
+    {"type": "C", "name": "Homopolymer compressed"},
+    {"type": "U", "name": "Uncompressed"},
+    {"type": "B", "name": "Both"},
+]
+
 PAF_FORMAT = [
     ("qname", "string", "Query sequence name"),
     ("qlen", "int", "Query sequence length"),
@@ -74,7 +80,7 @@ def get_selected_cluster(selected_cluster_fn):
         return f"{selected_cluster:03d}"
 
 
-def contig(request, p_id, p_number):
+def contig(request, p_id, p_number, p_type):
 
     contig = Contig.objects.get(pk=p_id)
 
@@ -158,6 +164,8 @@ def contig(request, p_id, p_number):
             "files": files,
             "selected_cluster": selected_cluster,
             "paf_format": PAF_FORMAT,
+            "type": p_type,
+            "view_modes": COMPRESSION_TYPES_VIEW_MODES
             # 'pafs': ( {'name':  'hg38', 'alignments': get_paf(paf_fn)[:10]},
             #          {'name':  'panTro6','alignments': get_paf(paf_fn)[:10]})
         },
