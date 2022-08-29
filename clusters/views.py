@@ -85,7 +85,41 @@ def contig(request, p_id, p_number):
         "assembler": "minimap2",
     }
 
+    FLANKING = 15
+
+    before = p_number - FLANKING
+    after = p_number + FLANKING + 1
+
+    if before < 0:
+        after = p_number + FLANKING - before
+
+    if after > contig.iterations:
+        before = p_number - FLANKING - after + contig.iterations
+
+    current_ranges = list(range(max(0, before), min(after, contig.iterations)))
+
+    if contig.iterations > 2 * FLANKING + 1:
+
+        ranges_group_by = contig.iterations // 20 // 5 * 5
+        ranges = [
+            list(
+                range(
+                    i * ranges_group_by,
+                    min(i * ranges_group_by + ranges_group_by, contig.iterations),
+                )
+            )
+            for i in range((contig.iterations + ranges_group_by - 1) // ranges_group_by)
+        ]
+
+        if len(ranges[-1]) == 1:
+            ranges[-2] += ranges[-1]
+            del ranges[-1]
+
+    else:
+        ranges = None
+
     clusters_fn = CLUSTERS_FN.format(**fn_kwargs)
+
     reads = get_reads(clusters_fn)
 
     selected_cluster_fn = SELECTED_CLUSTER_FN.format(**fn_kwargs)
@@ -104,7 +138,8 @@ def contig(request, p_id, p_number):
         "clusters/contig.html",
         {
             "contig": contig,
-            "ranges": [range(contig.get_iterations() + 1)],
+            "ranges": ranges,
+            "current_ranges": current_ranges,
             "number": p_number,
             "reads": reads,
             "files": files,

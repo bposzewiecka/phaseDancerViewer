@@ -34,16 +34,37 @@
 
     </div>
 
+    {% if ranges %}
+
     <div class="container-fluid">
-        <nav>
+        <div class="btn-group" role="group">
             {% for range in ranges %}
-                <ul class="pagination justify-content-center" >
-                    {% for i in range %}
-                        <li class="page-item {% if i == number %} active {% endif %}"><a class="page-link" href="{% url 'contig' p_id=contig.id p_number=i %}">{{i}}</a></li>
-                    {% endfor %}
-                </ul>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn {% if range|first <= number and number <= range|last %}btn-primary{% else %}btn-outline-primary{% endif %} dropdown-toggle " data-toggle="dropdown" aria-expanded="false">
+                        {{ range|first}}-{{ range|last}}
+
+
+                    </button>
+                    <div class="dropdown-menu">
+                        {% for i in range %}
+                            <a class="dropdown-item page-item"  href="{% url 'contig' p_id=contig.id p_number=i %}">{{i}}</a>
+                        {% endfor %}
+                    </div>
+                </div>
             {% endfor %}
-        </nav>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="container-fluid" style="margin-top: 10px">
+
+        <div class="btn-group" role="group">
+
+            {% for i in current_ranges %}
+                <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="{% url 'contig' p_id=contig.id p_number=i %}">{{i}}</a>
+            {% endfor %}
+
+        </div>
     </div>
 
     <div class="container-fluid">
