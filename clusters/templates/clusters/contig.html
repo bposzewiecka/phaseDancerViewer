@@ -78,94 +78,102 @@
         </div>
     </div>
 
-    <div class="container-fluid">
+    {% if status == 0 %}
+        <div class="container-fluid">
 
-        <ul class="nav nav-tabs" id="main_content_tab" role="tablist">
+            <ul class="nav nav-tabs" id="main_content_tab" role="tablist">
 
-            {% if contig.get_browser %}
+                {% if contig.get_browser %}
+
+                    <li class="nav-item">
+                        <a class='nav-link active' id="browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>
+                    </li>
+
+                {% endif %}
+
+                {% if contig.get_igv_screenshot %}
+                    <li class="nav-item">
+                        <a class="nav-link" id="screenshot-tab" data-toggle="tab" href="#screenshot" role="tab" aria-controls="screenshot" aria-selected="false">IGV screenshot</a>
+                    </li>
+                {% endif %}
 
                 <li class="nav-item">
-                    <a class='nav-link active' id="browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>
+                    <a class="nav-link" id="clusters-tab" data-toggle="tab" href="#clusters" role="tab" aria-controls="clusters" aria-selected="false">Clusters</a>
                 </li>
 
-            {% endif %}
+                {% if contig.mappings.all %}
+                    <li class="nav-item">
+                        <a class="nav-link" id="mapping-tab" data-toggle="tab" href="#mapping" role="tab" aria-controls="mapping" aria-selected="false">Mappings</a>
+                    </li>
+                {% endif %}
 
-            {% if contig.get_igv_screenshot %}
-                <li class="nav-item">
-                    <a class="nav-link" id="screenshot-tab" data-toggle="tab" href="#screenshot" role="tab" aria-controls="screenshot" aria-selected="false">IGV screenshot</a>
-                </li>
-            {% endif %}
+            </ul>
 
-            <li class="nav-item">
-                <a class="nav-link" id="clusters-tab" data-toggle="tab" href="#clusters" role="tab" aria-controls="clusters" aria-selected="false">Clusters</a>
-            </li>
+            <div class="tab-content">
 
-            {% if contig.mappings.all %}
-                <li class="nav-item">
-                    <a class="nav-link" id="mapping-tab" data-toggle="tab" href="#mapping" role="tab" aria-controls="mapping" aria-selected="false">Mappings</a>
-                </li>
-            {% endif %}
+                {% if contig.get_browser %}
 
-        </ul>
+                    <div class='tab-pane active' id="browser" role="tabpanel" aria-labelledby="browser-tab">
 
-        <div class="tab-content">
-
-            {% if contig.get_browser %}
-
-                <div class='tab-pane active' id="browser" role="tabpanel" aria-labelledby="browser-tab">
-
-                    {% if type == 'B' or type == 'C' %}
-                    <div>
-                        <div id="igv-viewer-compressed" >
+                        {% if type == 'B' or type == 'C' %}
+                        <div>
+                            <div id="igv-viewer-compressed" >
+                            </div>
                         </div>
-                    </div>
-                    {% endif %}
+                        {% endif %}
 
-                    {% if type == 'B' or type == 'U' %}
-                    <div>
-                        <div id="igv-viewer-uncompressed">
+                        {% if type == 'B' or type == 'U' %}
+                        <div>
+                            <div id="igv-viewer-uncompressed">
+                            </div>
                         </div>
+                        {% endif %}
+
                     </div>
-                    {% endif %}
 
-                </div>
+                {% endif %}
 
-            {% endif %}
+                {% if contig.get_igv_screenshot %}
+                    <div class="tab-pane" id="screenshot" role="tabpanel" aria-labelledby="screenshot-tab">
 
-            {% if contig.get_igv_screenshot %}
-                <div class="tab-pane" id="screenshot" role="tabpanel" aria-labelledby="screenshot-tab">
+                        <div class="container-margin">
+                            <img class="img-fluid" src="{% static files.IGV_VIEW_FN %}">
+                        </div>
+
+                    </div>
+                {% endif %}
+
+                <div class="tab-pane" id="clusters" role="tabpanel" aria-labelledby="clusters-tab">
 
                     <div class="container-margin">
-                        <img class="img-fluid" src="{% static files.IGV_VIEW_FN %}">
+                        <table class="table table-clusters">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Cluster</th>
+                                    <th scope="col">Read name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for read in reads %}
+                                    <tr>
+                                        <td class="text-center">{{read.cluster_number}}</td>
+                                        <td >{{read.name}}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
 
-                </div>
-            {% endif %}
-
-            <div class="tab-pane" id="clusters" role="tabpanel" aria-labelledby="clusters-tab">
-
-                <div class="container-margin">
-                    <table class="table table-clusters">
-                        <thead>
-                            <tr>
-                                <th scope="col">Cluster</th>
-                                <th scope="col">Read name</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for read in reads %}
-                                <tr>
-                                    <td class="text-center">{{read.cluster_number}}</td>
-                                    <td >{{read.name}}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
 
             </div>
-
-        </div>
+         {% else %}
+            <div class="container-fluid">
+                <div class="alert alert-danger" role="alert">
+                    No data for this iteration.
+                </div>
+            </div>
+         {% endif %}
 
     </div>
 

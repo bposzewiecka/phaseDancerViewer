@@ -169,12 +169,12 @@ def contig(request, p_id, p_number, p_type):
 
     reads = get_reads(clusters_fn)
 
-    context["selected_cluster"] = reads
+    context["reads"] = reads
 
     selected_cluster_fn = SELECTED_CLUSTER_FN.format(**fn_kwargs)
     selected_cluster = get_selected_cluster(selected_cluster_fn)
 
-    context["files"] = selected_cluster
+    context["selected_cluster"] = selected_cluster
 
     files = {
         compression: {
