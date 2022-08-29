@@ -1,3 +1,5 @@
+import os
+
 import yaml
 from django.shortcuts import render
 
@@ -24,6 +26,9 @@ FILES = {
     for compression in COMPRESSION_TYPES
 }
 
+DIRECTORY_FN = (
+    "static/data/{sample}/{contig}/{assembler}/{cl_type}_{cluster}/seq_{number}/"
+)
 CLUSTERS_FN = "static/data/{sample}/{contig}/{assembler}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{contig}.{cl_type}_{cluster}.{sample}.{assembler}.clusters.tsv"
 SELECTED_CLUSTER_FN = "static/data/{sample}/{contig}/{assembler}/{cl_type}_{cluster}/seq_{number}/clusters/seq_{number}.{contig}.{cl_type}_{cluster}.{sample}.{assembler}.selected_cluster.yaml"
 # PAF_FN = 'static/data/{sample}/{start_name}/{cl_type}_{cluster}/minimap2/seq_{number}/seq_{number}.{start_name}.{cl_type}_{cluster}.{sample}.paf'
@@ -80,32 +85,18 @@ def get_selected_cluster(selected_cluster_fn):
         return f"{selected_cluster:03d}"
 
 
-def contig(request, p_id, p_number, p_type):
-
-    contig = Contig.objects.get(pk=p_id)
-
-    iterations = contig.get_iterations()
-
-    fn_kwargs = {
-        "sample": contig.sample.name,
-        "contig": contig.name,
-        "cl_type": "nc",
-        "cluster": "000",
-        "type": "collapsed",
-        "number": f"{p_number:03d}",
-        "assembler": "minimap2",
-    }
+def get_ranges(iterations, number):
 
     FLANKING = 15
 
-    before = p_number - FLANKING
-    after = p_number + FLANKING + 1
+    before = number - FLANKING
+    after = number + FLANKING + 1
 
     if before < 0:
-        after = p_number + FLANKING - before
+        after = number + FLANKING - before
 
     if after > iterations:
-        before = p_number - FLANKING - after + iterations
+        before = number - FLANKING - after + iterations
 
     current_ranges = list(range(max(0, before), min(after, iterations)))
 
@@ -130,12 +121,60 @@ def contig(request, p_id, p_number, p_type):
     else:
         ranges = None
 
+    return ranges, current_ranges
+
+
+def contig(request, p_id, p_number, p_type):
+
+    contig = Contig.objects.get(pk=p_id)
+
+    ranges, current_ranges = get_ranges(contig.get_iterations(), p_number)
+
+    fn_kwargs = {
+        "sample": contig.sample.name,
+        "contig": contig.name,
+        "cl_type": "nc",
+        "cluster": "000",
+        "type": "collapsed",
+        "number": f"{p_number:03d}",
+        "assembler": "minimap2",
+    }
+
     clusters_fn = CLUSTERS_FN.format(**fn_kwargs)
+    directory_fn = DIRECTORY_FN.format(**fn_kwargs)
+
+    contig_name = (
+        "seq_{number}_{contig}_{cl_type}_{cluster}_{sample}_{assembler}".format(
+            **fn_kwargs
+        )
+    )
+
+    context = {
+        "contig": contig,
+        "contig_name": contig_name,
+        "ranges": ranges,
+        "current_ranges": current_ranges,
+        "number": p_number,
+        "paf_format": PAF_FORMAT,
+        "type": p_type,
+        "view_modes": COMPRESSION_TYPES_VIEW_MODES,
+        # 'pafs': ( {'name':  'hg38', 'alignments': get_paf(paf_fn)[:10]},
+        #          {'name':  'panTro6','alignments': get_paf(paf_fn)[:10]})
+    }
+
+    if not os.path.isdir(directory_fn):
+        context["status"] = 1
+
+        return render(request, "clusters/contig.html", context)
 
     reads = get_reads(clusters_fn)
 
+    context["selected_cluster"] = reads
+
     selected_cluster_fn = SELECTED_CLUSTER_FN.format(**fn_kwargs)
     selected_cluster = get_selected_cluster(selected_cluster_fn)
+
+    context["files"] = selected_cluster
 
     files = {
         compression: {
@@ -145,28 +184,7 @@ def contig(request, p_id, p_number, p_type):
         for compression in COMPRESSION_TYPES
     }
 
-    contig_name = (
-        "seq_{number}_{contig}_{cl_type}_{cluster}_{sample}_{assembler}".format(
-            **fn_kwargs
-        )
-    )
+    context["files"] = files
+    context["status"] = 0
 
-    return render(
-        request,
-        "clusters/contig.html",
-        {
-            "contig": contig,
-            "contig_name": contig_name,
-            "ranges": ranges,
-            "current_ranges": current_ranges,
-            "number": p_number,
-            "reads": reads,
-            "files": files,
-            "selected_cluster": selected_cluster,
-            "paf_format": PAF_FORMAT,
-            "type": p_type,
-            "view_modes": COMPRESSION_TYPES_VIEW_MODES
-            # 'pafs': ( {'name':  'hg38', 'alignments': get_paf(paf_fn)[:10]},
-            #          {'name':  'panTro6','alignments': get_paf(paf_fn)[:10]})
-        },
-    )
+    return render(request, "clusters/contig.html", context)
