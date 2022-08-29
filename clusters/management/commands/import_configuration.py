@@ -9,7 +9,7 @@ from phaseDancerViewer.settings import DATA_DIRS
 
 
 class Command(BaseCommand):
-    help = "Importing sample data from configutation file."
+    help = "Importing samples and contigs configutation from configutation file."
 
     def add_arguments(self, parser):
         parser.add_argument("sample_names", nargs="+", type=str)
