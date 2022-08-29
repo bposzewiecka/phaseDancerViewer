@@ -17,6 +17,9 @@ FILES = {
         "FASTA_FN": "data/{sample}/{contig}/{assembler}/{cl_type}_{cluster}/seq_{number}/seq_{number}.{contig}.{cl_type}_{cluster}.{sample}.{assembler}."
         + compression
         + ".fasta",
+        "FAI_FN": "data/{sample}/{contig}/{assembler}/{cl_type}_{cluster}/seq_{number}/seq_{number}.{contig}.{cl_type}_{cluster}.{sample}.{assembler}."
+        + compression
+        + ".fasta.fai",
     }
     for compression in COMPRESSION_TYPES
 }
@@ -75,6 +78,8 @@ def contig(request, p_id, p_number):
 
     contig = Contig.objects.get(pk=p_id)
 
+    iterations = contig.get_iterations()
+
     fn_kwargs = {
         "sample": contig.sample.name,
         "contig": contig.name,
@@ -93,22 +98,22 @@ def contig(request, p_id, p_number):
     if before < 0:
         after = p_number + FLANKING - before
 
-    if after > contig.iterations:
-        before = p_number - FLANKING - after + contig.iterations
+    if after > iterations:
+        before = p_number - FLANKING - after + iterations
 
-    current_ranges = list(range(max(0, before), min(after, contig.iterations)))
+    current_ranges = list(range(max(0, before), min(after, iterations)))
 
-    if contig.iterations > 2 * FLANKING + 1:
+    if iterations > 2 * FLANKING + 1:
 
-        ranges_group_by = contig.iterations // 20 // 5 * 5
+        ranges_group_by = iterations // 20 // 5 * 5
         ranges = [
             list(
                 range(
                     i * ranges_group_by,
-                    min(i * ranges_group_by + ranges_group_by, contig.iterations),
+                    min(i * ranges_group_by + ranges_group_by, iterations),
                 )
             )
-            for i in range((contig.iterations + ranges_group_by - 1) // ranges_group_by)
+            for i in range((iterations + ranges_group_by - 1) // ranges_group_by)
         ]
 
         if len(ranges[-1]) == 1:

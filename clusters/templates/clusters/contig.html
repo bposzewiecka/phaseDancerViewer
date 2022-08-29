@@ -22,12 +22,13 @@
                     <td>{{contig.sample.name}}</td>
                     <td>{{contig.name}}</td>
                     <td>{{selected_cluster}}</td>
-                    <td><a href="{% static files.uncompressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a></td>
+                    <td><a href="{% static files.uncompressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a>
+                        <a href="{% static files.uncompressed.FAI_FN %}"><i class="fas fa-download"></i> Download .fasta.fai file</a></td>
                     <td><a href="{% static files.uncompressed.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
-                        <a href="{% static files.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bai file</a></td>
+                        <a href="{% static files.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download bam.bai file</a></td>
                     <td><a href="{% static files.uncompressed.FASTA_FN %}"><i class="fas fa-download"></i> Download .fasta file</a></td>
                     <td><a href="{% static files.compressed.BAM_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bam file</a><br>
-                        <a href="{% static files.compressed.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download .bai file</a></td>
+                        <a href="{% static files.compressed.BAI_CLUSTERS_FN %}"><i class="fas fa-download"></i> Download bam.bai file</a></td>
                 </tr>
             </tbody>
         </table>
@@ -56,7 +57,9 @@
     </div>
     {% endif %}
 
-    <div class="container-fluid" style="margin-top: 10px">
+
+
+    <div class="container-fluid" style="margin: 20px 0">
 
         <div class="btn-group" role="group">
 
@@ -76,7 +79,7 @@
                 {% for type in files %}
 
                     <li class="nav-item">
-                        <a class='nav-link {% if type == "uncompressed" %}active{% endif %}' id="browser-{{type}}-tab" data-toggle="tab" href="#browser-{{type}}" role="tab" aria-controls="browser-{{type}}" aria-selected="true">Browser {% if type == "compressed" %}homopolymer compressed{% endif %}</a>
+                        <a class='nav-link {% if type == "compressed" %}active{% endif %}' id="browser-{{type}}-tab" data-toggle="tab" href="#browser-{{type}}" role="tab" aria-controls="browser-{{type}}" aria-selected="true">Browser {% if type == "compressed" %}homopolymer compressed{% endif %}</a>
                     </li>
 
                 {% endfor %}
@@ -107,7 +110,7 @@
 
                 {% for type in files %}
 
-                    <div class="tab-pane active" id="browser-{{type}}" role="tabpanel" aria-labelledby="browser-{{type}}-tab">
+                  <div class='tab-pane active' id="browser-{{type}}" role="tabpanel" aria-labelledby="browser-{{type}}-tab">
 
                         <div id="igv-viewer-{{type}}">
                         </div>
@@ -163,54 +166,61 @@
 
     <script>
 
+        async function load_igv_browser(type, fasta_fn, bam_fn, bai_fn) {
 
+            var igvDiv = document.getElementById("igv-viewer-" + type);
 
+            var options =  {
 
-    function load_igv_browser(type) {
+                reference: {
+                    fastaURL: fasta_fn
+                },
 
-        var igvDiv = document.getElementById("browser-" + type);
+                tracks: [
+                    {
+                        name: "Clusters",
+                        url: bam_fn,
+                        indexURL: bai_fn,
+                        format: "bam",
+                        type: "alignment",
+                        colorBy: "tag",
+                        colorByTag: "YC",
+                        bamColorTag: "YC",
+                        alignmentRowHeight: 8,
+                        autoHeight: true,
+                        deletionColor: "rgb(150, 150, 150)",
+                        insertionColor: "rgba(170, 170, 170, 0.2)",
+                        coverageColor: "rgb(220, 220, 220)",
 
-        var files = ;
-
-        var options =  {
-
-            reference: {
-                fastaURL: "{% static files.FASTA_FN %}"
-            },
-
-            tracks: [
-                {
-                    name: "Clusters",
-                    url: "{% static files.BAM_CLUSTERS_FN %}",
-                    indexURL: "{% static files.BAI_CLUSTERS_FN %}",
-                    format: "bam",
-                    type: "alignment",
-                    colorBy: "tag",
-                    colorByTag: "YC",
-                    bamColorTag: "YC",
-                    alignmentRowHeight: 8,
-                    autoHeight: true,
-                    deletionColor: "rgb(150, 150, 150)",
-                    insertionColor: "rgba(170, 170, 170, 0.2)",
-                    coverageColor: "rgb(220, 220, 220)",
-
-                    sort: {
-                        chr: "{{ files.CONTIG_NAME }}",
-                        position: 1000,
-                        option: "TAG",
-                        tag: "HP"
+                    /*    sort: {
+                            chr: "{{ files.CONTIG_NAME }}",
+                            position: 1000,
+                            option: "TAG",
+                            tag: "HP"
+                        }*/
                     }
-                }
-            ]
+                ]
+
+            }
+
+            await igv.createBrowser(igvDiv, options).then(function (browser) {
+                console.log("Created IGV browser");
+            })
 
         }
 
-        igv.createBrowser(igvDiv, options).then(function (browser) {
-            console.log("Created IGV browser");
-        })
+    (async() => {
+        await load_igv_browser("compressed", "{% static files.compressed.FASTA_FN %}", "{% static files.compressed.BAM_CLUSTERS_FN %}",  "{% static files.compressed.BAI_CLUSTERS_FN %}");
+        await load_igv_browser("uncompressed", "{% static files.uncompressed.FASTA_FN %}", "{% static files.uncompressed.BAM_CLUSTERS_FN %}",  "{% static files.uncompressed.BAI_CLUSTERS_FN %}");
 
-    }
+        window.setTimeout(() => {
+            const browserCompressed = document.getElementById("browser-compressed-tab");
+            const browserUncompressed = document.getElementById("browser-uncompressed-tab");
+            browserUncompressed.click();
+            browserCompressed.click();
+        }, 1000);
 
+    })();
 
     </script>
 

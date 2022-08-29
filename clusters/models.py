@@ -49,10 +49,10 @@ class Contig(PhaseDancerData):
     assembly_type = models.CharField(max_length=1, choices=ASSEMBLY_TYPES)
 
     def get_property(self, assembly_prop, sample_prop, default_value):
-        if assembly_prop:
+        if assembly_prop is not None:
             return assembly_prop
 
-        if sample_prop:
+        if sample_prop is not None:
             return sample_prop
 
         return default_value
