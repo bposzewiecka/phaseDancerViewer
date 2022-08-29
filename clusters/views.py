@@ -4,7 +4,7 @@ from django.shortcuts import render
 from .models import Contig
 
 COMPRESSION_TYPES = ("uncompressed", "compressed")
-FILE_TYPES = ("BAM_CLUSTERS_FN", "BAI_CLUSTERS_FN", "FASTA_FN")
+FILE_TYPES = ("BAM_CLUSTERS_FN", "BAI_CLUSTERS_FN", "FASTA_FN", "FAI_FN")
 
 FILES = {
     compression: {
@@ -105,7 +105,8 @@ def contig(request, p_id, p_number):
 
     if iterations > 2 * FLANKING + 1:
 
-        ranges_group_by = iterations // 20 // 5 * 5
+        ranges_group_by = max(iterations // 20 // 5 * 5, 10)
+
         ranges = [
             list(
                 range(
@@ -138,11 +139,18 @@ def contig(request, p_id, p_number):
         for compression in COMPRESSION_TYPES
     }
 
+    contig_name = (
+        "seq_{number}_{contig}_{cl_type}_{cluster}_{sample}_{assembler}".format(
+            **fn_kwargs
+        )
+    )
+
     return render(
         request,
         "clusters/contig.html",
         {
             "contig": contig,
+            "contig_name": contig_name,
             "ranges": ranges,
             "current_ranges": current_ranges,
             "number": p_number,

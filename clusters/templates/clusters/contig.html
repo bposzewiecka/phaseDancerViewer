@@ -36,6 +36,15 @@
 
     </div>
 
+    <div class="container-fluid" style="margin-bottom: 20px">
+        <div class="btn-group" role="group">
+
+            <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="#">Homopolymer compressed</a>
+            <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="#">Uncompressed</a>
+            <a class="btn btn {% if i == number %}btn-primary{% else %}btn-outline-primary{% endif %}" href="#}">Both</a>
+        </div>
+    </div>
+
     {% if ranges %}
 
     <div class="container-fluid">
@@ -77,13 +86,9 @@
 
             {% if contig.get_browser %}
 
-                {% for type in files %}
-
-                    <li class="nav-item">
-                        <a class='nav-link {% if type == "compressed" %}active{% endif %}' id="browser-{{type}}-tab" data-toggle="tab" href="#browser-{{type}}" role="tab" aria-controls="browser-{{type}}" aria-selected="true">Browser {% if type == "compressed" %}homopolymer compressed{% endif %}</a>
-                    </li>
-
-                {% endfor %}
+                <li class="nav-item">
+                    <a class='nav-link active' id="browser-tab" data-toggle="tab" href="#browser" role="tab" aria-controls="browser" aria-selected="true">Browser</a>
+                </li>
 
             {% endif %}
 
@@ -109,16 +114,17 @@
 
             {% if contig.get_browser %}
 
+                <div class='tab-pane active' id="browser" role="tabpanel" aria-labelledby="browser-tab">
+
                 {% for type in files %}
 
-                  <div class='tab-pane active' id="browser-{{type}}" role="tabpanel" aria-labelledby="browser-{{type}}-tab">
-
+                        <h2>{% if type == "compressed" %}Homopolymer-compressed{% else %}Uncompressed{% endif %}</h2>
                         <div id="igv-viewer-{{type}}">
                         </div>
 
-                    </div>
-
                 {% endfor %}
+
+                </div>
 
             {% endif %}
 
@@ -167,61 +173,51 @@
 
     <script>
 
-        async function load_igv_browser(type, fasta_fn, bam_fn, bai_fn) {
+    function load_igv_browser(type, fasta_fn, bam_fn, bai_fn) {
 
-            var igvDiv = document.getElementById("igv-viewer-" + type);
+        var igvDiv = document.getElementById("igv-viewer-" + type);
 
-            var options =  {
+        var options =  {
 
-                reference: {
-                    fastaURL: fasta_fn
-                },
+            reference: {
+                fastaURL: fasta_fn
+            },
 
-                tracks: [
-                    {
-                        name: "Clusters",
-                        url: bam_fn,
-                        indexURL: bai_fn,
-                        format: "bam",
-                        type: "alignment",
-                        colorBy: "tag",
-                        colorByTag: "YC",
-                        bamColorTag: "YC",
-                        alignmentRowHeight: 8,
-                        autoHeight: true,
-                        deletionColor: "rgb(150, 150, 150)",
-                        insertionColor: "rgba(170, 170, 170, 0.2)",
-                        coverageColor: "rgb(220, 220, 220)",
+            tracks: [
+                {
+                    name: "Clusters",
+                    url: bam_fn,
+                    indexURL: bai_fn,
+                    format: "bam",
+                    type: "alignment",
+                    colorBy: "tag",
+                    colorByTag: "YC",
+                    bamColorTag: "YC",
+                    alignmentRowHeight: 8,
+                    autoHeight: true,
+                    deletionColor: "rgb(150, 150, 150)",
+                    insertionColor: "rgba(170, 170, 170, 0.2)",
+                    coverageColor: "rgb(220, 220, 220)",
 
-                    /*    sort: {
-                            chr: "{{ files.CONTIG_NAME }}",
-                            position: 1000,
-                            option: "TAG",
-                            tag: "HP"
-                        }*/
+                    sort: {
+                        chr: "{{ contig_name }}",
+                        position: 5000,
+                        option: "TAG",
+                        tag: "HP"
                     }
-                ]
-
-            }
-
-            await igv.createBrowser(igvDiv, options).then(function (browser) {
-                console.log("Created IGV browser");
-            })
+                }
+            ]
 
         }
 
-    (async() => {
-        await load_igv_browser("compressed", "{% static files.compressed.FASTA_FN %}", "{% static files.compressed.BAM_CLUSTERS_FN %}",  "{% static files.compressed.BAI_CLUSTERS_FN %}");
-        await load_igv_browser("uncompressed", "{% static files.uncompressed.FASTA_FN %}", "{% static files.uncompressed.BAM_CLUSTERS_FN %}",  "{% static files.uncompressed.BAI_CLUSTERS_FN %}");
+        igv.createBrowser(igvDiv, options).then(function (browser) {
+            console.log("Created IGV browser");
+        })
 
-        window.setTimeout(() => {
-            const browserCompressed = document.getElementById("browser-compressed-tab");
-            const browserUncompressed = document.getElementById("browser-uncompressed-tab");
-            browserUncompressed.click();
-            browserCompressed.click();
-        }, 1000);
+    }
 
-    })();
+    load_igv_browser("compressed", "{% static files.compressed.FASTA_FN %}", "{% static files.compressed.BAM_CLUSTERS_FN %}",  "{% static files.compressed.BAI_CLUSTERS_FN %}");
+    load_igv_browser("uncompressed", "{% static files.uncompressed.FASTA_FN %}", "{% static files.uncompressed.BAM_CLUSTERS_FN %}",  "{% static files.uncompressed.BAI_CLUSTERS_FN %}");
 
     </script>
 
