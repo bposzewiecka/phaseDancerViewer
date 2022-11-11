@@ -17,7 +17,6 @@ class Command(BaseCommand):
     def read_sample_config(self, config_fn):
         def save_config(obj, config):
             obj.iterations = config.get("iterations")
-            obj.igv_screenshot = config.get("igv-screenshot")
             obj.browser = config.get("browser")
             obj.save()
 

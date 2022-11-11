@@ -14,7 +14,6 @@ class Reference(models.Model):
 
 class PhaseDancerData(models.Model):
     iterations = models.IntegerField(null=True, blank=True)
-    igv_screenshot = models.BooleanField(null=True)
     browser = models.BooleanField(null=True)
     mappings = models.ManyToManyField(Reference, blank=True)
 
@@ -44,9 +43,6 @@ class Contig(PhaseDancerData):
 
     def get_iterations(self):
         return self.get_property(self.iterations, self.sample.iterations, None)
-
-    def get_igv_screenshot(self):
-        return self.get_property(self.igv_screenshot, self.sample.igv_screenshot, False)
 
     def get_browser(self):
         return self.get_property(self.browser, self.sample.browser, True)
