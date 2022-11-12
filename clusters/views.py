@@ -55,7 +55,7 @@ PAF_FORMAT = [
 ]
 
 
-CONFIG_FILE_NAME = "static/data/config.yaml"
+CONFIG_FILE_NAME = "static/config.yaml"
 
 
 def read_config():
