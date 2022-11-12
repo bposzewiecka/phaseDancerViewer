@@ -3,7 +3,7 @@ import os
 import yaml
 from django.shortcuts import render
 
-from .models import Contig
+from .models import Contig, Sample
 
 COMPRESSION_TYPES = ("uncompressed", "compressed")
 FILE_TYPES = ("BAM_CLUSTERS_FN", "BAI_CLUSTERS_FN", "FASTA_FN", "FAI_FN")
@@ -55,7 +55,40 @@ PAF_FORMAT = [
 ]
 
 
+CONFIG_FILE_NAME = "static/data/config.yaml"
+
+
+def read_config():
+
+    Contig.objects.all().delete()
+    Sample.objects.all().delete()
+
+    with open(CONFIG_FILE_NAME) as f:
+
+        samples_data = yaml.safe_load(f)
+
+        for sample_name, sample_data in samples_data["samples"].items():
+
+            iterations = sample_data.get("iterations")
+            sample_db = Sample.objects.create(name=sample_name, iterations=iterations)
+
+            for contig_name in sample_data["contigs"]:
+
+                iterations = None
+
+                if isinstance(sample_data["contigs"], dict):
+                    iterations = sample_data["contigs"][contig_name].get("iterations")
+
+                Contig.objects.create(
+                    name=contig_name, iterations=iterations, sample=sample_db
+                )
+
+
 def index(request):
+
+    if not Contig.objects.count():
+        read_config()
+
     return render(request, "clusters/index.html", {"contigs": Contig.objects.all()})
 
 
